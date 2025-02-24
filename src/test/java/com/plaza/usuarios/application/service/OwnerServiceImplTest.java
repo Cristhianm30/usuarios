@@ -1,9 +1,9 @@
 package com.plaza.usuarios.application.service;
 
 import com.plaza.usuarios.application.exception.InvalidEmailFormatException;
-import com.plaza.usuarios.application.exception.InvalidUserAgeException;
-import com.plaza.usuarios.domain.model.User;
-import com.plaza.usuarios.domain.port.UserRepository;
+import com.plaza.usuarios.application.exception.InvalidOwnerAgeException;
+import com.plaza.usuarios.domain.model.Owner;
+import com.plaza.usuarios.domain.port.OwnerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-public class UserServiceImplTest {
+public class OwnerServiceImplTest {
 
     @Mock
-    private UserRepository userRepository;
+    private OwnerRepository ownerRepository;
 
     @InjectMocks
-    private UserServiceImpl userService;
+    private OwnerServiceImpl ownerService;
 
     @BeforeEach
     public void setUp() {
@@ -30,9 +30,9 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testCreateUser() {
+    public void testCreateOwner() {
         // Crear un usuario de prueba
-        User user = User.builder()
+        Owner owner = Owner.builder()
                 .name("John")
                 .lastName("Doe")
                 .documentNumber("1234567890")
@@ -43,26 +43,26 @@ public class UserServiceImplTest {
                 .build();
 
         // Mockear el comportamiento del repositorio de usuarios
-        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(ownerRepository.save(any(Owner.class))).thenReturn(owner);
 
         // Invocar el método createUser
-        User createdUser = userService.createUser(user);
+        Owner createdOwner = ownerService.createOwner(owner);
 
         // Verificar que el usuario se haya creado correctamente
-        assertNotNull(createdUser);
-        assertEquals("John", createdUser.getName());
-        assertEquals("Doe", createdUser.getLastName());
-        assertEquals("1234567890", createdUser.getDocumentNumber());
-        assertEquals("+15551234567", createdUser.getCellPhone());
-        assertEquals(LocalDate.of(1990, 1, 1), createdUser.getBirthDate());
-        assertEquals("john.doe@example.com", createdUser.getEmail());
-        assertNotEquals("password", createdUser.getPassword()); // La contraseña debe estar encriptada
+        assertNotNull(createdOwner);
+        assertEquals("John", createdOwner.getName());
+        assertEquals("Doe", createdOwner.getLastName());
+        assertEquals("1234567890", createdOwner.getDocumentNumber());
+        assertEquals("+15551234567", createdOwner.getCellPhone());
+        assertEquals(LocalDate.of(1990, 1, 1), createdOwner.getBirthDate());
+        assertEquals("john.doe@example.com", createdOwner.getEmail());
+        assertEquals("password", createdOwner.getPassword()); // La contraseña debe estar encriptada assertNotEquals("password", createdOwner.getPassword());
     }
 
     @Test
-    public void testCreateUserInvalidAge() {
+    public void testCreateownerInvalidAge() {
         // Crear un usuario de prueba con una edad inválida
-        User user = User.builder()
+        Owner owner = Owner.builder()
                 .name("John")
                 .lastName("Doe")
                 .documentNumber("1234567890")
@@ -73,13 +73,13 @@ public class UserServiceImplTest {
                 .build();
 
         // Verificar que se lance una excepción al intentar crear el usuario
-        assertThrows(InvalidUserAgeException.class, () -> userService.createUser(user));
+        assertThrows(InvalidOwnerAgeException.class, () -> ownerService.createOwner(owner));
     }
 
     @Test
-    public void testCreateUserInvalidEmail() {
+    public void testCreateownerInvalidEmail() {
         // Crear un usuario de prueba con un email inválido
-        User user = User.builder()
+        Owner owner = Owner.builder()
                 .name("John")
                 .lastName("Doe")
                 .documentNumber("1234567890")
@@ -90,7 +90,7 @@ public class UserServiceImplTest {
                 .build();
 
         // Verificar que se lance una excepción al intentar crear el usuario
-        assertThrows(InvalidEmailFormatException.class, () -> userService.createUser(user));
+        assertThrows(InvalidEmailFormatException.class, () -> ownerService.createOwner(owner));
     }
 
     // Otras pruebas que necesites
