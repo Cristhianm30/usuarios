@@ -22,7 +22,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(User user) {
         validateUser(user);
-        user.setPassword(encryptPassword(user.getPassword()));
+        user.setPassword(user.getPassword());
 
         return userRepository.save(user);
     }
@@ -47,8 +47,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private String encryptPassword(String password) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(password);
-    }
+//    private String encryptPassword(String password) {
+//        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//        return passwordEncoder.encode(password);
+//    }
 }
