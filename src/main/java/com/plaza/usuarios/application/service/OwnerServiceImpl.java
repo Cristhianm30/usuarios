@@ -1,5 +1,6 @@
 package com.plaza.usuarios.application.service;
 
+import com.plaza.usuarios.application.exception.InvalidDocumentNumberException;
 import com.plaza.usuarios.application.exception.InvalidEmailFormatException;
 import com.plaza.usuarios.application.exception.InvalidOwnerAgeException;
 import com.plaza.usuarios.domain.model.Owner;
@@ -19,9 +20,13 @@ public class OwnerServiceImpl implements OwnerService {
     @Autowired
     private OwnerRepository ownerRepository;
 
+    @Autowired
+    private RoleServiceImpl roleService;
+
     @Override
     public Owner createOwner(Owner owner) {
         validateOwner(owner);
+        owner.setRole(roleService.getOwnerRole());
         owner.setPassword(owner.getPassword()); //user.setPassword(encryptPassword(user.getPassword()));
 
         return ownerRepository.save(owner);
@@ -30,6 +35,7 @@ public class OwnerServiceImpl implements OwnerService {
     private void validateOwner(Owner owner) {
         validateOwnerAge(owner.getBirthDate());
         validateEmail(owner.getEmail());
+        validateDocumentNumber(owner.getDocumentNumber());
     }
 
     private void validateOwnerAge(LocalDate birthDate) {
@@ -44,6 +50,15 @@ public class OwnerServiceImpl implements OwnerService {
         Matcher matcher = pattern.matcher(email);
         if (!matcher.matches()) {
             throw new InvalidEmailFormatException("El formato del correo electrónico no es válido.");
+        }
+    }
+
+    private void validateDocumentNumber(String documentNumber) {
+        String regex = "^\\d{10}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(documentNumber);
+        if (!matcher.matches()) {
+            throw new InvalidDocumentNumberException("El formato del número de documento no es válido.");
         }
     }
 

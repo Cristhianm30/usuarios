@@ -1,8 +1,10 @@
 package com.plaza.usuarios.application.service;
 
+import com.plaza.usuarios.application.exception.InvalidDocumentNumberException;
 import com.plaza.usuarios.application.exception.InvalidEmailFormatException;
 import com.plaza.usuarios.application.exception.InvalidOwnerAgeException;
 import com.plaza.usuarios.domain.model.Owner;
+import com.plaza.usuarios.domain.model.Role;
 import com.plaza.usuarios.domain.port.OwnerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,9 @@ public class OwnerServiceImplTest {
 
     @Mock
     private OwnerRepository ownerRepository;
+
+    @Mock
+    private RoleServiceImpl roleService;
 
     @InjectMocks
     private OwnerServiceImpl ownerService;
@@ -41,6 +46,13 @@ public class OwnerServiceImplTest {
                 .email("john.doe@example.com")
                 .password("password")
                 .build();
+        Role role = Role.builder()
+                .id(1L)
+                .name("Propietario")
+                .build();
+
+        // Mockear el comportamiento de las dependencias
+        when(roleService.getOwnerRole()).thenReturn(role);
 
         // Mockear el comportamiento del repositorio de usuarios
         when(ownerRepository.save(any(Owner.class))).thenReturn(owner);
@@ -71,6 +83,10 @@ public class OwnerServiceImplTest {
                 .email("john.doe@example.com")
                 .password("password")
                 .build();
+        Role role = Role.builder()
+                .id(1L)
+                .name("Propietario")
+                .build();
 
         // Verificar que se lance una excepción al intentar crear el usuario
         assertThrows(InvalidOwnerAgeException.class, () -> ownerService.createOwner(owner));
@@ -88,10 +104,33 @@ public class OwnerServiceImplTest {
                 .email("john.doe")
                 .password("password")
                 .build();
+        Role role = Role.builder()
+                .id(1L)
+                .name("Propietario")
+                .build();
 
         // Verificar que se lance una excepción al intentar crear el usuario
         assertThrows(InvalidEmailFormatException.class, () -> ownerService.createOwner(owner));
     }
 
-    // Otras pruebas que necesites
+    @Test
+    public void testCreateownerInvalidDocumentNumber() {
+        Owner owner = Owner.builder()
+                .name("John")
+                .lastName("Doe")
+                .documentNumber("12345678912")
+                .cellPhone("+15551234567")
+                .birthDate(LocalDate.of(1990, 1, 1))
+                .email("john.doe@gmail.com")
+                .password("password")
+                .build();
+        Role role = Role.builder()
+                .id(1L)
+                .name("Propietario")
+                .build();
+
+
+        // Verificar que se lance una excepción al intentar crear el usuario
+        assertThrows(InvalidDocumentNumberException.class, () -> ownerService.createOwner(owner));
+    }
 }
