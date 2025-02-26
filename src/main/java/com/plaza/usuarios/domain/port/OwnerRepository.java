@@ -8,4 +8,5 @@ public interface OwnerRepository {
     Owner save(Owner owner);
 
     Optional<Owner> findByEmail(String email);
+    Optional<Owner> findById(Long id);
 }

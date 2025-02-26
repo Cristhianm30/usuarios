@@ -23,4 +23,8 @@ public class OwnerRepositoryImpl implements OwnerRepository {
         return jpaOwnerRepository.findByEmail(email);
     }
 
+    @Override
+    public Optional<Owner> findById(Long id) {
+        return jpaOwnerRepository.findById(id);
+    }
 }

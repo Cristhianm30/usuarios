@@ -3,6 +3,7 @@ package com.plaza.usuarios.application.service;
 import com.plaza.usuarios.application.exception.InvalidDocumentNumberException;
 import com.plaza.usuarios.application.exception.InvalidEmailFormatException;
 import com.plaza.usuarios.application.exception.InvalidOwnerAgeException;
+import com.plaza.usuarios.application.exception.OwnerNotFoundException;
 import com.plaza.usuarios.domain.model.Owner;
 import com.plaza.usuarios.domain.port.OwnerRepository;
 import com.plaza.usuarios.domain.service.OwnerService;
@@ -30,6 +31,11 @@ public class OwnerServiceImpl implements OwnerService {
         owner.setPassword(owner.getPassword()); //user.setPassword(encryptPassword(user.getPassword()));
 
         return ownerRepository.save(owner);
+    }
+
+    @Override
+    public Owner getOwnerById(Long id) {
+        return ownerRepository.findById(id).orElseThrow(() -> new OwnerNotFoundException("Propietario no encontrado"));
     }
 
     private void validateOwner(Owner owner) {
