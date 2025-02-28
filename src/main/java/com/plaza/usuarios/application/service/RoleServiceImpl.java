@@ -12,7 +12,7 @@ public class RoleServiceImpl {
     private RoleRepository roleRepository;
 
     public Role getOwnerRole() {
-        return roleRepository.findByName("Propietario")
+        return roleRepository.findByName("PROPIETARIO")
                 .orElseThrow(() -> new RuntimeException("Rol de propietario no encontrado"));
     }
 }

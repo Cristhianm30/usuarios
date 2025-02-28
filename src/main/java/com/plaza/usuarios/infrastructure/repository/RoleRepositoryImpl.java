@@ -1,6 +1,5 @@
 package com.plaza.usuarios.infrastructure.repository;
 
-import com.plaza.usuarios.domain.model.Owner;
 import com.plaza.usuarios.domain.model.Role;
 import com.plaza.usuarios.domain.port.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,12 +3,12 @@ package com.plaza.usuarios.application.service;
 import com.plaza.usuarios.application.exception.InvalidDocumentNumberException;
 import com.plaza.usuarios.application.exception.InvalidEmailFormatException;
 import com.plaza.usuarios.application.exception.InvalidOwnerAgeException;
-import com.plaza.usuarios.application.exception.OwnerNotFoundException;
-import com.plaza.usuarios.domain.model.Owner;
-import com.plaza.usuarios.domain.port.OwnerRepository;
-import com.plaza.usuarios.domain.service.OwnerService;
+import com.plaza.usuarios.application.exception.UserNotFoundException;
+import com.plaza.usuarios.domain.model.User;
+import com.plaza.usuarios.domain.port.UserRepository;
+import com.plaza.usuarios.domain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,35 +16,38 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class OwnerServiceImpl implements OwnerService {
+public class UserServiceImpl implements UserService {
 
     @Autowired
-    private OwnerRepository ownerRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private RoleServiceImpl roleService;
 
-    @Override
-    public Owner createOwner(Owner owner) {
-        validateOwner(owner);
-        owner.setRole(roleService.getOwnerRole());
-        owner.setPassword(owner.getPassword()); //user.setPassword(encryptPassword(user.getPassword()));
-
-        return ownerRepository.save(owner);
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
-    public Owner getOwnerById(Long id) {
-        return ownerRepository.findById(id).orElseThrow(() -> new OwnerNotFoundException("Propietario no encontrado"));
+    public User createOwner(User user) {
+        validateOwner(user);
+        user.setRole(roleService.getOwnerRole());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        return userRepository.save(user);
     }
 
-    private void validateOwner(Owner owner) {
-        validateOwnerAge(owner.getBirthDate());
-        validateEmail(owner.getEmail());
-        validateDocumentNumber(owner.getDocumentNumber());
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Propietario no encontrado"));
     }
 
-    private void validateOwnerAge(LocalDate birthDate) {
+    private void validateOwner(User user) {
+        validateAge(user.getBirthDate());
+        validateEmail(user.getEmail());
+        validateDocumentNumber(user.getDocumentNumber());
+    }
+
+    private void validateAge(LocalDate birthDate) {
         if (birthDate.isAfter(LocalDate.now().minusYears(18))) {
             throw new InvalidOwnerAgeException("El propietario debe ser mayor de edad.");
         }
@@ -68,8 +71,4 @@ public class OwnerServiceImpl implements OwnerService {
         }
     }
 
-//    private String encryptPassword(String password) {
-//        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//        return passwordEncoder.encode(password);
-//    }
 }

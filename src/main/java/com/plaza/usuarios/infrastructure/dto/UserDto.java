@@ -1,11 +1,12 @@
 package com.plaza.usuarios.infrastructure.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class OwnerDto {
+public class UserDto {
 
     private Long id;
     private String name;
