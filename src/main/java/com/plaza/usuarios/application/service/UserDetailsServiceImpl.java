@@ -3,8 +3,6 @@ package com.plaza.usuarios.application.service;
 
 import com.plaza.usuarios.domain.model.User;
 import com.plaza.usuarios.domain.port.UserRepository;
-
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
