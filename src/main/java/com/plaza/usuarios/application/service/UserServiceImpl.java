@@ -1,12 +1,10 @@
 package com.plaza.usuarios.application.service;
 
-import com.plaza.usuarios.application.exception.InvalidDocumentNumberException;
-import com.plaza.usuarios.application.exception.InvalidEmailFormatException;
-import com.plaza.usuarios.application.exception.InvalidOwnerAgeException;
-import com.plaza.usuarios.application.exception.UserNotFoundException;
+import com.plaza.usuarios.application.exception.*;
 import com.plaza.usuarios.domain.model.User;
 import com.plaza.usuarios.domain.port.UserRepository;
 import com.plaza.usuarios.domain.service.UserService;
+import com.plaza.usuarios.infrastructure.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -69,6 +67,31 @@ public class UserServiceImpl implements UserService {
         if (!matcher.matches()) {
             throw new InvalidDocumentNumberException("El formato del número de documento no es válido.");
         }
+    }
+
+    public UserDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        if (user.getPassword() == null) {
+            throw new IllegalStateException("El usuario no tiene contraseña asignada");
+        }
+
+        return convertToDto(user);
+    }
+
+    private UserDto convertToDto(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setName(user.getName());
+        userDto.setLastName(user.getLastName());
+        userDto.setPassword(user.getPassword());
+        userDto.setDocumentNumber(user.getDocumentNumber());
+        userDto.setBirthDate(user.getBirthDate());
+        userDto.setCellPhone(user.getCellPhone());
+        userDto.setEmail(user.getEmail());
+        userDto.setRole(user.getRole().getName());
+        return userDto;
     }
 
 }

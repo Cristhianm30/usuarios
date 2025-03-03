@@ -8,8 +8,8 @@ import com.plaza.usuarios.infrastructure.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,6 +32,15 @@ public class UserController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
+    @GetMapping("/email")
+    public ResponseEntity<UserDto> getUserByEmail(@RequestParam String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+        UserDto userDto = convertToDto(user);
+        return ResponseEntity.ok(userDto);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
@@ -51,11 +60,12 @@ public class UserController {
         userDto.setId(user.getId());
         userDto.setName(user.getName());
         userDto.setLastName(user.getLastName());
+        userDto.setPassword(user.getPassword());
         userDto.setDocumentNumber(user.getDocumentNumber());
         userDto.setBirthDate(user.getBirthDate());
         userDto.setCellPhone(user.getCellPhone());
         userDto.setEmail(user.getEmail());
-        userDto.setRole(user.getRole().getId());
+        userDto.setRole(user.getRole().getName());
         return userDto;
     }
 

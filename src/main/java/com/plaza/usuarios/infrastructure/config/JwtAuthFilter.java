@@ -21,6 +21,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
 
+    // Inyección de dependencias: JwtUtils para validar tokens y UserDetailsService para cargar usuarios
     public JwtAuthFilter(JwtUtils jwtUtils, UserDetailsService userDetailsService) {
         this.jwtUtils = jwtUtils;
         this.userDetailsService = userDetailsService;
@@ -32,42 +33,55 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+
+        // Paso 1: Obtener el encabezado "Authorization" de la solicitud
         final String authHeader = request.getHeader("Authorization");
 
-        // 1. Validar estructura del token
+        // Si no hay token o no comienza con "Bearer ", continuar sin autenticación
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Extraer token
+        // Paso 2: Extraer el token JWT (eliminar "Bearer ")
         final String jwt = authHeader.substring(7);
-        final String userEmail = jwtUtils.extractEmail(jwt);
 
-        // 3. Validar contexto de seguridad y token
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        try {
+            // Paso 3: Validar el token (firma y expiración)
+            if (!jwtUtils.validateToken(jwt)) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido o expirado");
+                return;
+            }
 
-            // 4. Cargar usuario desde la base de datos
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            // Paso 4: Extraer el email del token
+            final String userEmail = jwtUtils.extractEmail(jwt);
 
-            // 5. Validar token vs información del usuario
-            if (jwtUtils.validateToken(jwt)) {
+            // Paso 5: Si el usuario ya está autenticado, omitir
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // 6. Crear objeto de autenticación
+                // Paso 6: Cargar el usuario desde la base de datos
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+                // Paso 7: Crear objeto de autenticación con roles
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
-                        null,
-                        userDetails.getAuthorities() // Asegurar que tenga roles
+                        null, // Credenciales (no necesarias aquí)
+                        userDetails.getAuthorities() // Roles del usuario
                 );
 
-                // 7. Agregar detalles de la solicitud
+                // Paso 8: Agregar detalles de la solicitud (IP, navegador, etc.)
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // 8. Establecer autenticación en el contexto
+                // Paso 9: Establecer la autenticación en el contexto de seguridad
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-        }
 
-        filterChain.doFilter(request, response);
+            // Continuar con la cadena de filtros
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            // Manejar errores (token expirado, usuario no encontrado, etc.)
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error de autenticación: " + e.getMessage());
+        }
     }
 }
