@@ -24,7 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
                 .password(user.getPassword())
-                .roles(user.getRole().getName()) // Spring agregará automáticamente ROLE_ADMINISTRADOR
+                .roles(user.getRole().getName())
                 .build();
 
 

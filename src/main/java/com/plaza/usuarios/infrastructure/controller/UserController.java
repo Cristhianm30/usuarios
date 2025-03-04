@@ -5,6 +5,7 @@ import com.plaza.usuarios.domain.port.UserRepository;
 import com.plaza.usuarios.domain.service.UserService;
 import com.plaza.usuarios.infrastructure.config.JwtUtils;
 import com.plaza.usuarios.infrastructure.dto.UserDto;
+import com.plaza.usuarios.infrastructure.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class UserController {
     private UserRepository userRepository;
 
     @PostMapping("/owner")
-    @PreAuthorize("hasRole('ADMINISTRADOR')") // Reemplazar validación manual
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<User> createOwner(@RequestBody User user) {
         User createdUser = userService.createOwner(user);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -37,14 +38,14 @@ public class UserController {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        UserDto userDto = convertToDto(user);
+        UserDto userDto = UserMapper.toDto(user);
         return ResponseEntity.ok(userDto);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
-        UserDto userDto = convertToDto(user);
+        UserDto userDto = UserMapper.toDto(user);
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
@@ -52,22 +53,9 @@ public class UserController {
     public ResponseEntity<UserDto> getCurrentUser(@RequestHeader("Authorization") String token) {
         String email = jwtUtils.extractEmail(token.substring(7));
         User user = userRepository.findByEmail(email).orElseThrow();
-        return ResponseEntity.ok(convertToDto(user));
+        return ResponseEntity.ok(UserMapper.toDto(user));
     }
 
-    private UserDto convertToDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setName(user.getName());
-        userDto.setLastName(user.getLastName());
-        userDto.setPassword(user.getPassword());
-        userDto.setDocumentNumber(user.getDocumentNumber());
-        userDto.setBirthDate(user.getBirthDate());
-        userDto.setCellPhone(user.getCellPhone());
-        userDto.setEmail(user.getEmail());
-        userDto.setRole(user.getRole().getName());
-        return userDto;
-    }
 
 
 }

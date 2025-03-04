@@ -5,6 +5,7 @@ import com.plaza.usuarios.domain.model.User;
 import com.plaza.usuarios.domain.port.UserRepository;
 import com.plaza.usuarios.domain.service.UserService;
 import com.plaza.usuarios.infrastructure.dto.UserDto;
+import com.plaza.usuarios.infrastructure.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -77,21 +78,9 @@ public class UserServiceImpl implements UserService {
             throw new IllegalStateException("El usuario no tiene contraseña asignada");
         }
 
-        return convertToDto(user);
+        return UserMapper.toDto(user);
     }
 
-    private UserDto convertToDto(User user) {
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setName(user.getName());
-        userDto.setLastName(user.getLastName());
-        userDto.setPassword(user.getPassword());
-        userDto.setDocumentNumber(user.getDocumentNumber());
-        userDto.setBirthDate(user.getBirthDate());
-        userDto.setCellPhone(user.getCellPhone());
-        userDto.setEmail(user.getEmail());
-        userDto.setRole(user.getRole().getName());
-        return userDto;
-    }
+
 
 }
