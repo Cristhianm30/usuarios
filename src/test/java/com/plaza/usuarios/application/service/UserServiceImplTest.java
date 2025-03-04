@@ -4,10 +4,12 @@ package com.plaza.usuarios.application.service;
 import com.plaza.usuarios.UserDataProvider;
 import com.plaza.usuarios.application.exception.InvalidDocumentNumberException;
 import com.plaza.usuarios.application.exception.InvalidEmailFormatException;
+import com.plaza.usuarios.application.exception.InvalidEmployeeException;
 import com.plaza.usuarios.application.exception.InvalidOwnerAgeException;
 import com.plaza.usuarios.domain.model.Role;
 import com.plaza.usuarios.domain.model.User;
 import com.plaza.usuarios.domain.port.UserRepository;
+import com.plaza.usuarios.infrastructure.dto.UserDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -87,5 +90,43 @@ public class UserServiceImplTest {
 
         // When & Then
         assertThrows(InvalidDocumentNumberException.class, () -> userService.createOwner(user));
+    }
+
+    @Test
+    void createEmployee_ValidUser() {
+        // Configurar mocks
+        Role employeeRole = Role.builder().id(2L).name("EMPLEADO").build();
+        User user = UserDataProvider.validUserMock();
+        when(roleService.getEmployeeRole()).thenReturn(employeeRole);
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        when(userRepository.save(user)).thenReturn(user);
+
+        // Ejecutar
+        User result = userService.createEmployee(user);
+
+        // Verificar
+        assertEquals("EMPLEADO", result.getRole().getName());
+        verify(userRepository, times(1)).save(user);
+    }
+
+
+    @Test
+    void getUserByEmail_ValidEmail() {
+        User user = UserDataProvider.userWithRoleMock();
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+
+        UserDto result = userService.getUserByEmail("john.doe@example.com");
+
+        assertEquals("John", result.getName());
+        assertEquals("PROPIETARIO", result.getRole());
+    }
+
+    @Test
+    void getUserByEmail_UserWithoutPassword() {
+        User user = UserDataProvider.validUserMock();
+        user.setPassword(null);
+        when(userRepository.findByEmail(any())).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalStateException.class, () -> userService.getUserByEmail("test@example.com"));
     }
 }

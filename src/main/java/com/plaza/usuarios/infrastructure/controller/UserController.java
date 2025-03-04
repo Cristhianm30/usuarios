@@ -35,10 +35,7 @@ public class UserController {
 
     @GetMapping("/email")
     public ResponseEntity<UserDto> getUserByEmail(@RequestParam String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-
-        UserDto userDto = UserMapper.toDto(user);
+        UserDto userDto = userService.getUserByEmail(email);
         return ResponseEntity.ok(userDto);
     }
 
@@ -52,8 +49,15 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser(@RequestHeader("Authorization") String token) {
         String email = jwtUtils.extractEmail(token.substring(7));
-        User user = userRepository.findByEmail(email).orElseThrow();
-        return ResponseEntity.ok(UserMapper.toDto(user));
+        UserDto userDto = userService.getUserByEmail(email);
+        return ResponseEntity.ok(userDto);
+    }
+
+    @PostMapping("/employee")
+    @PreAuthorize("hasRole('PROPIETARIO')")
+    public ResponseEntity<User> createEmployee(@RequestBody User employeeRequest) {
+        User createdEmployee = userService.createEmployee(employeeRequest);
+        return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
     }
 
 

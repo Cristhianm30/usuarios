@@ -41,6 +41,7 @@ public class SecurityConfig {
 
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/owner").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/user/employee").hasRole("PROPIETARIO")
                         .requestMatchers(HttpMethod.GET, "/user/me").authenticated()
                         .anyRequest().authenticated()
                 )
