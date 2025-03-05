@@ -5,4 +5,5 @@ import com.plaza.usuarios.domain.model.Role;
 public interface RoleService {
     Role getOwnerRole();
     Role getEmployeeRole();
+    Role getClientRole();
 }

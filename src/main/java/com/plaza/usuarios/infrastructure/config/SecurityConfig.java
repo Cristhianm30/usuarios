@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/user/{id}",
                                 "/user/email",
+                                "/user/client",
                                 "/error",
                                 "/swagger-ui/**",
                                 "/swagger-ui.**",

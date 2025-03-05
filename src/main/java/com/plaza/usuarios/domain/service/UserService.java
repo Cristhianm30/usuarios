@@ -7,5 +7,6 @@ public interface UserService {
     User createOwner(User user);
     User getUserById(Long id);
     User createEmployee(User user);
+    User createClient(User user);
     UserDto getUserByEmail(String email);
 }

@@ -60,6 +60,12 @@ public class UserController {
         return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
     }
 
+    @PostMapping("/client")
+    public ResponseEntity<User> createClient(@RequestBody User clientRequest) {
+        User createdClient = userService.createClient(clientRequest);
+        return new ResponseEntity<>(createdClient, HttpStatus.CREATED);
+    }
+
 
 
 }

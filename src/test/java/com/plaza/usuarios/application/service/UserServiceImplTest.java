@@ -39,8 +39,9 @@ public class UserServiceImplTest {
     private UserServiceImpl userService;
 
     // Pruebas unitarias
+
     @Test
-    void testCreateOwner() {
+    void testCreateOwner_ValidUser() {
         // Given
         Role ownerRole = Role.builder().id(1L).name("PROPIETARIO").build();
         User user = UserDataProvider.validUserMock(); // Usar el DataProvider
@@ -106,6 +107,23 @@ public class UserServiceImplTest {
 
         // Verificar
         assertEquals("EMPLEADO", result.getRole().getName());
+        verify(userRepository, times(1)).save(user);
+    }
+
+    @Test
+    void createClient_ValidUser() {
+        // Configurar mocks
+        Role clientRole = Role.builder().id(3L).name("CLIENTE").build();
+        User user = UserDataProvider.validUserMock();
+        when(roleService.getClientRole()).thenReturn(clientRole);
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        when(userRepository.save(user)).thenReturn(user);
+
+        // Ejecutar
+        User result = userService.createClient(user);
+
+        // Verificar
+        assertEquals("CLIENTE", result.getRole().getName());
         verify(userRepository, times(1)).save(user);
     }
 

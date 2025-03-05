@@ -26,8 +26,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // ----------- Casos de uso --------------//
     @Override
     public User createOwner(User user) {
+
         validateOwner(user);
         user.setRole(roleService.getOwnerRole());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createEmployee(User user) {
+
         validateEmployee(user);
         user.setRole(roleService.getEmployeeRole());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -45,12 +48,39 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    private void validateOwner(User user) {
-        // Campos obligatorios para propietarios
-        if (user.getBirthDate() == null) {
-            throw new InvalidOwnerAgeException("La fecha de nacimiento es obligatoria");
+    @Override
+    public User createClient(User user){
+
+        validateClient(user);
+        user.setRole(roleService.getClientRole());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+    }
+
+    @Override
+    public UserDto getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        if (user.getPassword() == null) {
+            throw new IllegalStateException("El usuario no tiene contraseña asignada");
         }
-        validateOwnerFields(user);
+
+        return UserMapper.toDto(user);
+    }
+
+    // ----------- Validaciones --------------//
+
+    private void validateOwner(User user) {
+
+        validateBirthDateFields(user);
+        validateFields(user);
         validateAge(user.getBirthDate());
         validateEmail(user.getEmail());
         validateDocumentNumber(user.getDocumentNumber());
@@ -58,8 +88,18 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateEmployee(User user) {
+        validateFields(user);
         validateEmail(user.getEmail());
         validateDocumentNumber(user.getDocumentNumber());
+        validateCellPhone(user.getCellPhone(), 13);
+    }
+
+    private void validateClient(User user){
+        validateFields(user);
+        validateEmail(user.getEmail());
+        validateDocumentNumber(user.getDocumentNumber());
+        validateCellPhone(user.getCellPhone(),13);
+
     }
 
 
@@ -96,33 +136,38 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void validateOwnerFields(User user) {
+    private void validateBirthDateFields(User user) {
+
+        if (user.getBirthDate() == null) {
+            throw new InvalidUserException("La fecha de nacimiento es obligatoria para propietarios");
+        }
+    }
+
+    private void validateFields(User user) {
+
         if (user.getName() == null || user.getName().isBlank()) {
             throw new InvalidUserException("El nombre es obligatorio");
         }
         if (user.getLastName() == null || user.getLastName().isBlank()) {
             throw new InvalidUserException("El apellido es obligatorio");
         }
-        if (user.getBirthDate() == null) {
-            throw new InvalidUserException("La fecha de nacimiento es obligatoria para propietarios");
+        if (user.getDocumentNumber() == null || user.getDocumentNumber().isBlank()) {
+            throw new InvalidUserException("El número de documento es obligatorio");
+        }
+        if (user.getCellPhone() == null || user.getCellPhone().isBlank()) {
+            throw new InvalidUserException("El celular es obligatorio");
+        }
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new InvalidUserException("El correo electrónico es obligatorio");
         }
     }
 
-    public UserDto getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
-        if (user.getPassword() == null) {
-            throw new IllegalStateException("El usuario no tiene contraseña asignada");
-        }
 
-        return UserMapper.toDto(user);
-    }
 
-    @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Propietario no encontrado"));
-    }
+
+
+
 
 
 

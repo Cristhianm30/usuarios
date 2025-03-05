@@ -21,4 +21,9 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository.findByName("EMPLEADO")
                 .orElseThrow(() -> new RuntimeException("Rol de empleado no encontrado"));
     }
+
+    public Role getClientRole() {
+        return roleRepository.findByName("CLIENTE")
+                .orElseThrow(() -> new RuntimeException("Rol de cliente no encontrado"));
+    }
 }
